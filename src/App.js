@@ -115,18 +115,6 @@ function ListBox() {
   )
 }
 
-function MovieList() {
-  const [movies, setMovies] = useState(tempMovieData)
-
-  return (
-    <ul className="list">
-      {movies?.map((movie) => (
-        <Movie movie={movie} />
-      ))}
-    </ul>
-  )
-}
-
 function Movie({ movie }) {
   return (
     <li key={movie.imdbID}>
@@ -139,6 +127,18 @@ function Movie({ movie }) {
         </p>
       </div>
     </li>
+  )
+}
+
+function MovieList() {
+  const [movies, setMovies] = useState(tempMovieData)
+
+  return (
+    <ul className="list">
+      {movies?.map((movie) => (
+        <Movie movie={movie} />
+      ))}
+    </ul>
   )
 }
 
