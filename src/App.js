@@ -90,16 +90,6 @@ function NumResults() {
   )
 }
 
-function NavBar() {
-  return (
-    <nav className="nav-bar">
-      <Logo />
-      <Search />
-      <NumResults />
-    </nav>
-  )
-}
-
 function ListBox() {
   const [isOpen1, setIsOpen1] = useState(true)
   return (
@@ -112,6 +102,16 @@ function ListBox() {
       </button>
       {isOpen1 && <MovieList />}
     </div>
+  )
+}
+
+function NavBar() {
+  return (
+    <nav className="nav-bar">
+      <Logo />
+      <Search />
+      <NumResults />
+    </nav>
   )
 }
 
