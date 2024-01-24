@@ -1,4 +1,7 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+
+const average = (arr) =>
+  arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0)
 
 const tempMovieData = [
   {
@@ -47,12 +50,45 @@ const tempWatchedData = [
   },
 ]
 
-const average = (arr) =>
-  arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0)
+const KEY = "52f56d3e"
 
+/**
+ * The main component of the application.
+ *
+ * @returns {JSX.Element} The rendered App component.
+ */
 export default function App() {
-  const [movies, setMovies] = useState(tempMovieData)
-  const [watched, setWatched] = useState(tempWatchedData)
+  const [movies, setMovies] = useState([])
+  const [watched, setWatched] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  const QUERY = "x-men"
+
+  useEffect(function () {
+    async function fetchMovies() {
+      try {
+        setIsLoading(true)
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${KEY}&s=${QUERY}`
+        )
+        if (!res.ok)
+          throw new Error("Someting went wrong while fetching movies")
+
+        const data = await res.json()
+        if (data.Response === "False")
+          throw new Error("Movie/TV-Show not found.")
+
+        setMovies(data.Search)
+      } catch (err) {
+        console.error(err.message)
+        setError(err.message)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchMovies()
+  }, [])
 
   return (
     <>
@@ -73,8 +109,11 @@ export default function App() {
         /> */}
 
         <Box>
-          <MovieList movies={movies} />
+          {isLoading && <Loading />}
+          {!isLoading && !error && <MovieList movies={movies} />}
+          {error && <ErrorMessage message={error} />}
         </Box>
+
         <Box>
           <>
             <Summary watched={watched} />
@@ -86,6 +125,19 @@ export default function App() {
   )
 }
 
+function Loading() {
+  return <p className="loader">Loading....</p>
+}
+
+function ErrorMessage({ message }) {
+  return (
+    <p className="error">
+      <span>⚠️</span>
+      {message}
+    </p>
+  )
+}
+
 function NavBar({ children }) {
   return <nav className="nav-bar">{children}</nav>
 }
@@ -94,7 +146,7 @@ function Logo() {
   return (
     <div className="logo">
       <span role="img">🍿</span>
-      <h1>usePopcorn</h1>
+      <h1>showSpace</h1>
     </div>
   )
 }
