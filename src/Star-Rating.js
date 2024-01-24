@@ -11,7 +11,7 @@ const startContainerStyle = {
   display: "flex",
 }
 
-StartRating.propTypes = {
+StarRating.propTypes = {
   maxRating: PropTypes.number,
   defaultRating: PropTypes.number,
   size: PropTypes.number,
@@ -20,7 +20,7 @@ StartRating.propTypes = {
   classname: PropTypes.string,
 }
 
-export default function StartRating({
+export default function StarRating({
   maxRating = 10,
   color = "green",
   size = 48,
