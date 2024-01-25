@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react"
 import { MovieDetails } from "./MovieDetails"
 import { Summary } from "./Summary"
-import { WatchedListMovies } from "./WatchedListMovies"
+import { Box } from "./Box"
+import { MovieList } from "./MovieList"
+import { WatchedList } from "./WatchedList"
 
 export const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0)
@@ -63,14 +65,33 @@ export default function App() {
   const [error, setError] = useState("")
   const [selectedId, setSelectedID] = useState(null)
 
+  function handleMovieId(id) {
+    setSelectedID(selectedId === id ? null : id)
+  }
+
+  function handleCloseMovie() {
+    setSelectedID(null)
+  }
+
+  function handleMovieWatched(movie) {
+    setWatched((watched) => [...watched, movie])
+  }
+
+  function handleDeletewatchedMovies(id) {
+    setWatched((watched) => watched.filter((movie) => movie.imdbID !== id))
+  }
+
   useEffect(
     function () {
+      const controller = new AbortController()
+
       async function fetchMovies() {
         try {
           setIsLoading(true)
           setError("")
           const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+            { signal: controller.signal }
           )
           if (!res.ok)
             throw new Error("Someting went wrong while fetching movies")
@@ -81,9 +102,12 @@ export default function App() {
           if (data.Response === "False")
             throw new Error("Movie/TV-Show not found.")
           setMovies(data.Search)
+          setError("")
         } catch (err) {
           //console.error(err.message)
-          setError(err.message)
+          if (err.name !== "AbortError") {
+            setError(err.message)
+          }
         } finally {
           setIsLoading(false)
         }
@@ -93,22 +117,15 @@ export default function App() {
         setError("")
         return
       }
+      handleCloseMovie()
       fetchMovies()
+
+      return function () {
+        controller.abort()
+      }
     },
     [query]
   )
-
-  function handleMovieId(id) {
-    setSelectedID(selectedId === id ? null : id)
-  }
-
-  function handleCloseMovie(id) {
-    setSelectedID(null)
-  }
-
-  function handleMovieWatched(movie) {
-    setWatched((watched) => [...watched, movie])
-  }
 
   return (
     <>
@@ -142,11 +159,15 @@ export default function App() {
               selectedId={selectedId}
               onClosingMovie={handleCloseMovie}
               onWatched={handleMovieWatched}
+              watched={watched}
             />
           ) : (
             <>
               <Summary watched={watched} />
-              <WatchedList watched={watched} />
+              <WatchedList
+                watched={watched}
+                onDelete={handleDeletewatchedMovies}
+              />
             </>
           )}
         </Box>
@@ -203,72 +224,4 @@ function NumResults({ movies }) {
 
 function Main({ children }) {
   return <main className="main">{children}</main>
-}
-
-function Box({ children }) {
-  const [isOpen, setIsOpen] = useState(true)
-  return (
-    <div className="box">
-      <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
-        {isOpen ? "–" : "+"}
-      </button>
-      {isOpen && children}
-    </div>
-  )
-}
-
-/*
-function WatchedBox() {
-  const [isOpen2, setIsOpen2] = useState(true)
-
-  return (
-    <div className="box">
-      <button
-        className="btn-toggle"
-        onClick={() => setIsOpen2((open) => !open)}
-      >
-        {isOpen2 ? "–" : "+"}
-      </button>
-      {isOpen2 && (
-
-      )}
-    </div>
-  )
-}
-
-*/
-
-function MovieList({ movies, onSelectMovie }) {
-  return (
-    <ul className="list list-movies">
-      {movies?.map((movie) => (
-        <Movie movie={movie} key={movie.imdbID} onSelectMovie={onSelectMovie} />
-      ))}
-    </ul>
-  )
-}
-
-function Movie({ movie, onSelectMovie }) {
-  return (
-    <li onClick={() => onSelectMovie(movie.imdbID)}>
-      <img src={movie.Poster} alt={`${movie.Title} poster`} />
-      <h3>{movie.Title}</h3>
-      <div>
-        <p>
-          <span>🗓</span>
-          <span>{movie.Year}</span>
-        </p>
-      </div>
-    </li>
-  )
-}
-
-function WatchedList({ watched }) {
-  return (
-    <ul className="list">
-      {watched.map((movie) => (
-        <WatchedListMovies movie={movie} key={movie.imdbID} />
-      ))}
-    </ul>
-  )
 }

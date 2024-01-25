@@ -18,6 +18,7 @@ StarRating.propTypes = {
   color: PropTypes.string,
   messages: PropTypes.array,
   classname: PropTypes.string,
+  onSetRating: PropTypes.func,
 }
 
 export default function StarRating({
@@ -27,10 +28,15 @@ export default function StarRating({
   classname = "",
   messages = [],
   defaultRating = 0,
+  onSetRating,
 }) {
   const [rating, setRating] = useState(defaultRating)
   const [tempRating, setTempRating] = useState(0)
 
+  function handleRating(rating) {
+    setRating(rating)
+    onSetRating(rating)
+  }
   const textStyle = {
     lineHeight: "1",
     margine: "0",
@@ -44,7 +50,7 @@ export default function StarRating({
         {Array.from({ length: maxRating }, (_, i) => (
           <Star
             key={i}
-            onRate={() => setRating(i + 1)}
+            onRate={() => handleRating(i + 1)}
             full={tempRating ? tempRating >= i + 1 : rating >= i + 1}
             setHoverOn={() => setTempRating(i + 1)}
             setHoverOff={() => setTempRating(0)}

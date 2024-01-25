@@ -2,10 +2,21 @@ import { useEffect, useState } from "react"
 import StarRating from "./Star-Rating"
 import { KEY, Loading } from "./App"
 
-export function MovieDetails({ selectedId, onClosingMovie, onWatched }) {
+export function MovieDetails({
+  selectedId,
+  onClosingMovie,
+  onWatched,
+  watched,
+}) {
   const [movie, setMovie] = useState({})
   const [isLoading, setIsLoading] = useState(false)
+  const [userRating, setUserRating] = useState("")
 
+  const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId)
+
+  const watcheduUserRating = watched.find(
+    (movie) => movie.imdbID === selectedId
+  )?.userRating
   const {
     Title: title,
     Poster: poster,
@@ -29,8 +40,10 @@ export function MovieDetails({ selectedId, onClosingMovie, onWatched }) {
       title,
       poster,
       imdbRating: Number(imdbRating),
+      userRating,
     }
     onWatched(newWatchedMovie)
+    onClosingMovie()
   }
 
   useEffect(
@@ -47,6 +60,33 @@ export function MovieDetails({ selectedId, onClosingMovie, onWatched }) {
       getMovieDetails()
     },
     [selectedId]
+  )
+
+  useEffect(
+    function () {
+      function callBack(e) {
+        if (e.code === "Escape") {
+          onClosingMovie()
+        }
+      }
+      document.addEventListener("keydown", callBack)
+      return function () {
+        document.removeEventListener("keydown", callBack)
+      }
+    },
+    [onClosingMovie]
+  )
+
+  useEffect(
+    function () {
+      if (!title) return
+      document.title = `${title}`
+
+      return function () {
+        document.title = "showSpace"
+      }
+    },
+    [title]
   )
 
   return (
@@ -68,13 +108,27 @@ export function MovieDetails({ selectedId, onClosingMovie, onWatched }) {
               <p>Genre: {genre}</p>
               <span>⭐️ {imdbRating} IMDB Rating</span>
               <section>
-                <div className="rating">
-                  {" "}
-                  <StarRating color={"var(--color-primary)"} size={24} />
-                  <button className="btn-add" onClick={handleAddWatchedMovie}>
-                    Marked as Watched
-                  </button>{" "}
-                </div>
+                {!isWatched ? (
+                  <div className="rating">
+                    {" "}
+                    <StarRating
+                      color={"var(--color-primary)"}
+                      size={24}
+                      onSetRating={setUserRating}
+                    />
+                    {userRating > 0 && (
+                      <button
+                        className="btn-add"
+                        onClick={handleAddWatchedMovie}
+                      >
+                        Marked as Watched
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <p>You rated this movie with {watcheduUserRating} Stars</p>
+                )}
+
                 {/* <p>Boxoffice: {boxoffice}</p> */}
                 <p>Director: {director}</p>
                 <p>Actors: {actors}</p>
