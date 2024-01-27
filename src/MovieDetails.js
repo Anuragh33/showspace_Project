@@ -62,6 +62,10 @@ export function MovieDetails({
     [selectedId]
   )
 
+  useEffect(() => {
+    localStorage.getItem("watched", JSON.stringify(watched))
+  }, [watched])
+
   useEffect(
     function () {
       function callBack(e) {
