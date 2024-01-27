@@ -21,11 +21,11 @@ export function MovieDetails({
     Title: title,
     Poster: poster,
     Year: year,
-    Released: released,
+    // Released: released,
     Runtime: runtime,
     Actors: actors,
     Director: director,
-    BoxOffice: boxoffice,
+    // BoxOffice: boxoffice,
     Genre: genre,
     imdbRating,
     Plot,
@@ -61,10 +61,6 @@ export function MovieDetails({
     },
     [selectedId]
   )
-
-  useEffect(() => {
-    localStorage.getItem("watched", JSON.stringify(watched))
-  }, [watched])
 
   useEffect(
     function () {

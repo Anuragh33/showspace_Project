@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { MovieDetails } from "./MovieDetails"
 import { Summary } from "./Summary"
 import { Box } from "./Box"
@@ -13,10 +13,16 @@ export const KEY = "52f56d3e"
 export default function App() {
   const [query, setQuery] = useState("")
   const [movies, setMovies] = useState([])
-  const [watched, setWatched] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [selectedId, setSelectedID] = useState(null)
+
+  // const [watched, setWatched] = useState([])
+
+  const [watched, setWatched] = useState(() => {
+    const storedItem = localStorage.getItem("watched")
+    return JSON.parse(storedItem)
+  })
 
   function handleMovieId(id) {
     setSelectedID(selectedId === id ? null : id)
@@ -33,6 +39,10 @@ export default function App() {
   function handleMovieWatched(movie) {
     setWatched((watched) => [...watched, movie])
   }
+
+  useEffect(() => {
+    localStorage.setItem("watched", JSON.stringify(watched))
+  }, [watched])
 
   useEffect(
     function () {
@@ -146,6 +156,21 @@ function Logo() {
 }
 
 function Search({ query, setQuery }) {
+  const inputEl = useRef(null)
+
+  useEffect(() => {
+    function callback(e) {
+      if (document.activeElement === inputEl) return
+      if (e.key === "Enter" || e.key === "NumpadEnter") {
+        inputEl.current.focus()
+        setQuery("")
+      }
+    }
+
+    document.addEventListener("keydown", callback)
+    return () => document.removeEventListener("keydown", callback)
+  }, [setQuery])
+
   return (
     <input
       className="search"
@@ -153,6 +178,7 @@ function Search({ query, setQuery }) {
       placeholder="Search Movies..."
       value={query}
       onChange={(e) => setQuery(e.target.value)}
+      ref={inputEl}
     />
   )
 }
