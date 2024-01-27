@@ -73,12 +73,12 @@ export default function App() {
     setSelectedID(null)
   }
 
-  function handleMovieWatched(movie) {
-    setWatched((watched) => [...watched, movie])
-  }
-
   function handleDeletewatchedMovies(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id))
+  }
+
+  function handleMovieWatched(movie) {
+    setWatched((watched) => [...watched, movie])
   }
 
   useEffect(
