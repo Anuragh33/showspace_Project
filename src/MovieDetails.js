@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import StarRating from "./Star-Rating"
-import { KEY, Loading } from "./App"
+import { Loading, KEY } from "./App"
 
 export function MovieDetails({
   selectedId,
@@ -32,6 +32,16 @@ export function MovieDetails({
     Language,
   } = movie
 
+  const countGivenRatings = useRef(0)
+
+  useEffect(() => {
+    localStorage.setItem("watched", JSON.stringify(watched))
+  }, [watched])
+
+  useEffect(() => {
+    if (userRating) countGivenRatings.current++
+  }, [userRating])
+
   function handleAddWatchedMovie() {
     const newWatchedMovie = {
       imdbID: selectedId,
@@ -41,6 +51,7 @@ export function MovieDetails({
       poster,
       imdbRating: Number(imdbRating),
       userRating,
+      countRatingDecision: countGivenRatings.current,
     }
     onWatched(newWatchedMovie)
     onClosingMovie()
