@@ -5,6 +5,8 @@ import { Box } from "./Box"
 import { MovieList } from "./MovieList"
 import { WatchedList } from "./WatchedList"
 import { useMovies } from "./useMovies"
+import { useLocalStorageState } from "./useLocalStorageState"
+import { useKey } from "./useKey"
 
 export const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0)
@@ -13,15 +15,9 @@ export const KEY = "52f56d3e"
 
 export default function App() {
   const [query, setQuery] = useState("")
-
   const [selectedId, setSelectedID] = useState(null)
-
   const { movies, error, isLoading } = useMovies(query, handleCloseMovie)
-
-  const [watched, setWatched] = useState(() => {
-    const storedItem = localStorage.getItem("watched")
-    return JSON.parse(storedItem)
-  })
+  const [watched, setWatched] = useLocalStorageState([], "watched")
 
   function handleMovieId(id) {
     setSelectedID(selectedId === id ? null : id)
@@ -107,18 +103,11 @@ function Logo() {
 function Search({ query, setQuery }) {
   const inputEl = useRef(null)
 
-  useEffect(() => {
-    function callback(e) {
-      if (document.activeElement === inputEl) return
-      if (e.key === "Enter" || e.key === "NumpadEnter") {
-        inputEl.current.focus()
-        setQuery("")
-      }
-    }
-
-    document.addEventListener("keydown", callback)
-    return () => document.removeEventListener("keydown", callback)
-  }, [setQuery])
+  useKey("Escape", () => {
+    if (document.activeElement === inputEl) return
+    inputEl.current.focus()
+    setQuery("")
+  })
 
   return (
     <input

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import StarRating from "./Star-Rating"
 import { Loading, KEY } from "./App"
+import { useKey } from "./useKey"
 
 export function MovieDetails({
   selectedId,
@@ -35,10 +36,6 @@ export function MovieDetails({
   const countGivenRatings = useRef(0)
 
   useEffect(() => {
-    localStorage.setItem("watched", JSON.stringify(watched))
-  }, [watched])
-
-  useEffect(() => {
     if (userRating) countGivenRatings.current++
   }, [userRating])
 
@@ -57,6 +54,8 @@ export function MovieDetails({
     onClosingMovie()
   }
 
+  useKey("Escape", onClosingMovie)
+
   useEffect(
     function () {
       async function getMovieDetails() {
@@ -71,21 +70,6 @@ export function MovieDetails({
       getMovieDetails()
     },
     [selectedId]
-  )
-
-  useEffect(
-    function () {
-      function callBack(e) {
-        if (e.code === "Escape") {
-          onClosingMovie()
-        }
-      }
-      document.addEventListener("keydown", callBack)
-      return function () {
-        document.removeEventListener("keydown", callBack)
-      }
-    },
-    [onClosingMovie]
   )
 
   useEffect(
